@@ -2,6 +2,9 @@
 
 use App\Controllers\WelcomeController;
 use Core\Routing\Route;
+use App\Controllers\AuthController;
+
+Route::post('/admin/auth', [AuthController::class, 'login']);
 
 /**
  * Make something great with this app
