@@ -18,8 +18,21 @@ class AuthController extends Controller
     {
         $valid = $request->validated();
 
-        if ($valid->fails()) {
-            return $json->errorBadRequest($valid->messages());
+        if (
+    $valid['email'] !== 'admin@demo.com' ||
+    $valid['password'] !== 'admin123'
+) {
+    throw new Exception('Invalid credentials');
+}
+
+// Simulasikan login manual
+auth()->login([
+    'id' => 1,
+    'name' => 'Demo Admin',
+    'email' => 'admin@demo.com',
+    'is_active' => true
+]);
+
         }
 
         try {
