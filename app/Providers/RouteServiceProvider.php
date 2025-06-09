@@ -28,9 +28,9 @@ class RouteServiceProvider extends Provider
     {
         $this->app->singleton(Router::class);
         if (!Route::setRouteFromCacheIfExist()) {
-            Route::middleware(CsrfMiddleware::class)->group(function () {
-                Route::setRouteFromFile();
-            });
+            Route::group(function () {
+    Route::setRouteFromFile();
+});
 
             Route::prefix(static::$API_PREFIX)->middleware(CookieMiddleware::class)->group(function () {
                 Route::get('/health', [static::class, 'health']);
