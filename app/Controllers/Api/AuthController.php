@@ -15,53 +15,52 @@ use Throwable;
 class AuthController extends Controller
 {
     public function login(AuthRequest $request, JsonResponse $json): JsonResponse
-    {
-        $valid = $request->validated();
+{
+    $valid = $request->validated();
 
-        if (
-    $valid['email'] !== 'admin@demo.com' ||
-    $valid['password'] !== 'admin123'
-) {
-    throw new Exception('Invalid credentials');
-}
-
-// Simulasikan login manual
-auth()->login([
-    'id' => 1,
-    'name' => 'Demo Admin',
-    'email' => 'admin@demo.com',
-    'is_active' => true
-]);
-
-        }
-
-        try {
-            if (!Auth::attempt($valid->only(['email', 'password']))) {
-                throw new Exception('Invalid credentials');
-            }
-        } catch (Throwable) {
-            return $json->error(Respond::HTTP_UNAUTHORIZED);
-        }
-
-        if (!auth()->user()->isActive()) {
-            return $json->errorBadRequest(['user not active.']);
-        }
-
-        $time = Time::factory()->getTimestamp();
-        $token = JWT::encode(
-            [
-                'iat' => $time,
-                'exp' => $time + (60 * 60),
-                'iss' => base_url(),
-                'sub' => strval(auth()->id()),
-            ],
-            env('JWT_KEY'),
-            env('JWT_ALGO', 'HS256')
-        );
-
-        return $json->successOK([
-            'token' => $token,
-            'user' => Auth::user()->only(['name', 'email'])
-        ]);
+    if ($valid->fails()) {
+        return $json->errorBadRequest($valid->messages());
     }
+
+    // ✅ Bypass login tanpa Auth::attempt
+    if (
+        $valid['email'] !== 'admin@demo.com' ||
+        $valid['password'] !== 'admin123'
+    ) {
+        return $json->error(Respond::HTTP_UNAUTHORIZED);
+    }
+
+    // ✅ Simulasikan user login
+    auth()->login([
+        'id' => 1,
+        'name' => 'Demo Admin',
+        'email' => 'admin@demo.com',
+        'is_active' => true
+    ]);
+
+    if (!auth()->user()->isActive()) {
+        return $json->errorBadRequest(['user not active.']);
+    }
+
+    if (!env('JWT_KEY')) {
+        return $json->errorBadRequest(['JWT Key not found!.']);
+    }
+
+    $time = Time::factory()->getTimestamp();
+    $token = JWT::encode(
+        [
+            'iat' => $time,
+            'exp' => $time + (60 * 60),
+            'iss' => base_url(),
+            'sub' => strval(auth()->id()),
+        ],
+        env('JWT_KEY'),
+        env('JWT_ALGO', 'HS256')
+    );
+
+    return $json->successOK([
+        'token' => $token,
+        'user' => auth()->user()->only(['name', 'email'])
+    ]);
+}
 }
