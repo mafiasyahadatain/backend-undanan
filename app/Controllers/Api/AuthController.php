@@ -22,15 +22,15 @@ class AuthController extends Controller
         return $json->errorBadRequest($valid->messages());
     }
 
-    // ✅ Bypass login tanpa Auth::attempt
+    $data = $valid->only(['email', 'password']);
+
     if (
-        $valid['email'] !== 'admin@demo.com' ||
-        $valid['password'] !== 'admin123'
+        $data['email'] !== 'admin@demo.com' ||
+        $data['password'] !== 'admin123'
     ) {
         return $json->error(Respond::HTTP_UNAUTHORIZED);
     }
 
-    // ✅ Simulasikan user login
     auth()->login([
         'id' => 1,
         'name' => 'Demo Admin',
